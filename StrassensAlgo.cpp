@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdlib>
 
 using namespace std;
 
@@ -127,17 +128,6 @@ public:
 	}
 
 	matrix<T>& operator*=(const matrix<T>& _matrix);
-	// matrix<T>& operator*=(const matrix<T>& _matrix){
-	// 	if (this->size != _matrix.getSize())
-	// 		cerr << "error!!!" << endl;
-	// 	else{
-	// 		for (int i = 0; i < size; i++){
-	// 			for (int j = 0; j < size; j++){
-	// 				elements[i][j] -= _matrix[i][j];
-	// 			}
-	// 		}
-	// 	}
-	// }
 
 	matrix<T>& operator^=(const matrix<T>& _matrix){
 		if (this->size != _matrix.getSize())
@@ -184,51 +174,26 @@ matrix<T>& matrix<T>::operator*=(const matrix<T>& _matrix){
 	if (this->size != _matrix.getSize() || size < 1)
 		cerr << "error!!!" << endl;
 	else{
-		if (size == 1)
-			elements[0][0] *= _matrix[0][0];
-		else if (size == 2){
-			T S[10], P[7];
-			S[0] = _matrix[0][1] - _matrix[1][1];
-			S[1] = elements[0][0] + elements[0][1];
-			S[2] = elements[1][0] + elements[1][1];
-			S[3] = _matrix[1][0] - _matrix[0][0];
-			S[4] = elements[0][0] + elements[1][1];
-			S[5] = _matrix[0][0] + _matrix[1][1];
-			S[6] = elements[0][1] - elements[1][1];
-			S[7] = _matrix[1][0] + _matrix[1][1];
-			S[8] = elements[0][0] - elements[1][0];
-			S[9] = _matrix[0][0] + _matrix[0][1];
+		if (size == 2){
+			T P[7];
 
-			P[0] = elements[0][0] * S[0];
-			P[1] = S[1] * _matrix[1][1];
-			P[2] = S[2] * _matrix[0][0];
-			P[3] = elements[1][1] * S[3];
-			P[4] = S[4] * S[5];
-			P[5] = S[6] * S[7];
-			P[6] = S[8] * S[9];
+			P[0] = elements[0][0] * (_matrix[0][1] - _matrix[1][1]);
+			P[1] = (elements[0][0] + elements[0][1]) * _matrix[1][1];
+			P[2] = (elements[1][0] + elements[1][1]) * _matrix[0][0];
+			P[3] = elements[1][1] * (_matrix[1][0] - _matrix[0][0]);
+			P[4] = (elements[0][0] + elements[1][1]) * (_matrix[0][0] + _matrix[1][1]);
+			P[5] = (elements[0][1] - elements[1][1]) * (_matrix[1][0] + _matrix[1][1]);
+			P[6] = (elements[0][0] - elements[1][0]) * _matrix[0][0] + _matrix[0][1];
 
 			elements[0][0] = P[4] + P[3] - P[1] + P[5];
 			elements[0][1] = P[0] + P[1];
 			elements[1][0] = P[2] + P[3];
 			elements[1][1] = P[4] + P[0] - P[2] - P[6];
 		}
-		else{
-			// matrix<T> S[10], P[7], A[2][2], B[2][2], C[2][2];
+		else if (size > 2){
 			matrix<T> P[7], A[2][2], B[2][2];
-			// type:
-		// 	0: 11, 1: 12, 2: 21, 3: 22
 			getSubArrays(A[0][0], A[0][1], A[1][0], A[1][1]);
 			_matrix.getSubArrays(B[0][0], B[0][1], B[1][0], B[1][1]);
-			// S[0] = B[0][1] - B[1][1];
-			// S[1] = A[0][0] + A[0][1];
-			// S[2] = A[1][0] + A[1][1];
-			// S[3] = B[1][0] - B[0][0];
-			// S[4] = A[0][0] + A[1][1];
-			// S[5] = B[0][0] + B[1][1];
-			// S[6] = A[0][1] - A[1][1];
-			// S[7] = B[1][0] + B[1][1];
-			// S[8] = A[0][0] - A[1][0];
-			// S[9] = B[0][0] + B[0][1];
 
 			P[0] = A[0][0] * (B[0][1] - B[1][1]);
 			P[1] = (A[0][0] + A[0][1]) * B[1][1];
@@ -238,24 +203,13 @@ matrix<T>& matrix<T>::operator*=(const matrix<T>& _matrix){
 			P[5] = (A[0][1] - A[1][1]) * (B[1][0] + B[1][1]);
 			P[6] = (A[0][0] - A[1][0]) * (B[0][0] + B[0][1]);
 
-			// P[0] = A[0][0] * S[0];
-			// P[1] = S[1] * B[1][1];
-			// P[2] = S[2] * B[0][0];
-			// P[3] = A[1][1] * S[3];
-			// P[4] = S[4] * S[5];
-			// P[5] = S[6] * S[7];
-			// P[6] = S[8] * S[9];
-
-			// C[0][0] = P[4] + P[3] - P[1] + P[5];
-			// C[0][1] = P[0] + P[1];
-			// C[1][0] = P[2] + P[3];
-			// C[1][1] = P[4] + P[0] - P[2] - P[6];
-			// combineArrays(C[0][0], C[0][1], C[1][0], C[1][1]);
 			combineArrays(P[4] + P[3] - P[1] + P[5],
 							P[0] + P[1],
 							P[2] + P[3],
 							P[4] + P[0] - P[2] - P[6]);
 		}
+		else
+			elements[0][0] *= _matrix[0][0];
 	}
 	return *this;
 };
@@ -273,7 +227,7 @@ ostream& operator<<(ostream& outStream, const matrix<T>& _matrix){
 
 int main(int argc, char*argv[]){
 	// srand(time(NULL));
-	// const int n = 10;
+	// const int n = 21;
 	// matrix<int> A(n), B(n);
 	// for (int i = 0; i < n; i++){
 	// 	for (int j = 0; j < n; j++){
@@ -288,7 +242,7 @@ int main(int argc, char*argv[]){
 	// return 0;
 
 	// matrix<int> A(200, 1), B(200, 2);
-	matrix<int> A(10000, 1), B(10000, 2);
+	matrix<int> A(200, 1), B(200, 2);
 	clock_t start = clock();
 	matrix<int> C(A * B);
 	// matrix<int> C(A ^ B);
